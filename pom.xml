@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.xtop</groupId>
+  <artifactId>xtop-parent</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
+  <name>xtop-ddd-parent</name>
+
+  <!-- 注意: 这里的顺序不影响打包顺序, Maven reactor 会按模块间依赖自动拓扑排序 -->
+  <modules>
+    <!-- 1. 公共模块必须排在第一位（作为基础依赖） -->
+    <module>xtop-common</module>
+
+    <!-- 2. 独立微服务和业务微服务（Maven 会自动根据它们内部的依赖调整顺序） -->
+    <module>xtop-infra</module>
+    <module>xtop-gateway</module>
+    <module>xtop-ddd-order</module>
+    <module>xtop-ddd-user</module>
+      <module>xtop-batch</module>
+
+
+  </modules>
+
+  <properties>
+    <java.version>1.8</java.version>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <spring-boot.version>2.3.12.RELEASE</spring-boot.version>
+    <spring-cloud.version>Hoxton.SR12</spring-cloud.version>
+  </properties>
+
+  <dependencyManagement>
+    <dependencies>
+      <!-- Spring Boot BOM (支持 JDK1.8) -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-dependencies</artifactId>
+        <version>${spring-boot.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <!-- Spring Cloud BOM (gateway 网关 / feign 契约需要) -->
+      <dependency>
+        <groupId>org.springframework.cloud</groupId>
+        <artifactId>spring-cloud-dependencies</artifactId>
+        <version>${spring-cloud.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+
+      <!-- 内部模块统一版本: 子模块引用时不用写 version, 保证依赖关系清晰, reactor 才能正确排序 -->
+      <!--common 内部模块  依赖 start-->
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-common-model</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-common-feign</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-common-util</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <!--common 内部模块  依赖 end-->
+
+
+      <!--infra 内部模块  依赖 start-->
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-infra</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-infra-model</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-infra-dao</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-infra-service</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <!--infra 内部模块  依赖 end-->
+
+      <!--ddd-order 内部模块  依赖 start-->
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId> xtop-ddd-order-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-ddd-order-domain</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-ddd-order-infrastructure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-ddd-order-application</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <!--ddd-order 内部模块  依赖 end-->
+
+
+      <!--ddd-user 内部模块  依赖 start-->
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId> xtop-ddd-user-api</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-ddd-user-domain</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-ddd-user-infrastructure</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-ddd-user-application</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <!--ddd-user   内部模块  依赖 end-->
+
+
+
+      <!--ddd-batch 内部模块  依赖 start-->
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-batch-model</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-batch-dao</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-batch-service</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-batch-controller</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <!--ddd-batch 内部模块  依赖 end-->
+
+
+
+    </dependencies>
+  </dependencyManagement>
+
+  <build>
+    <!-- 关键: 放 pluginManagement 而不是 build/plugins
+         避免被所有子模块继承导致纯 jar 库模块也被 repackage 成可执行 jar
+         只有 *-bootstrap 模块在自己的 build/plugins 里引用它 -->
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+          <version>${spring-boot.version}</version>
+        </plugin>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.8.1</version>
+          <configuration>
+            <source>${maven.compiler.source}</source>
+            <target>${maven.compiler.target}</target>
+            <encoding>${project.build.sourceEncoding}</encoding>
+          </configuration>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
+</project>

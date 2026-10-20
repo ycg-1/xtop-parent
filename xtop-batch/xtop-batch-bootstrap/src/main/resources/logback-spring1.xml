@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="60 seconds">
+
+    <property name="LOG_HOME" value="/appLogs"/>
+    <property name="SQL_LOGGER_PREFIXES" value="com.xtop.dao,org.apache.ibatis"/>
+    <property name="DEBUG_TO_INFO_LOGGER_PREFIXES" value="org.springdoc,com.baomidou"/>
+
+    <!-- 统一格式：时间 线程 traceId tradeNo flowNo 级别 logger - 消息 -->
+    <property name="COMMON_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId:--}] [%X{tradeNo:--}] [%X{flowNo:--}] [%logger{36}] [%level] - %msg%n"/>
+    <property name="ERROR_PATTERN"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId:--}] [%X{tradeNo:--}] [%X{flowNo:--}] [%logger{36}] [%level] - %msg%n%ex{full}"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="com.xtop.common.util.log.filter.LogLevelFilter">
+            <acceptInfo>true</acceptInfo>
+            <acceptError>true</acceptError>
+            <acceptSqlDebug>true</acceptSqlDebug>
+            <sqlLoggerPrefixes>${SQL_LOGGER_PREFIXES}</sqlLoggerPrefixes>
+            <debugLoggerPrefixes>${DEBUG_TO_INFO_LOGGER_PREFIXES}</debugLoggerPrefixes>
+        </filter>
+        <encoder>
+            <pattern>${COMMON_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="ASYNC_CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
+        <appender-ref ref="CONSOLE"/>
+        <queueSize>1024</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <neverBlock>true</neverBlock>
+        <includeCallerData>false</includeCallerData>
+        <maxFlushTime>1000</maxFlushTime>
+    </appender>
+
+    <appender name="FILE_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/INFO.log</file>
+        <filter class="com.xtop.common.util.log.filter.LogLevelFilter">
+            <acceptInfo>true</acceptInfo>
+            <acceptError>false</acceptError>
+            <acceptSqlDebug>true</acceptSqlDebug>
+            <sqlLoggerPrefixes>${SQL_LOGGER_PREFIXES}</sqlLoggerPrefixes>
+            <debugLoggerPrefixes>${DEBUG_TO_INFO_LOGGER_PREFIXES}</debugLoggerPrefixes>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/INFO-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>5GB</totalSizeCap>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${COMMON_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="FILE_INFO_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>2048</queueSize>
+        <neverBlock>true</neverBlock>
+        <includeCallerData>false</includeCallerData>
+        <maxFlushTime>1000</maxFlushTime>
+        <appender-ref ref="FILE_INFO"/>
+    </appender>
+
+    <appender name="FILE_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/ERROR.log</file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_HOME}/ERROR-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>2GB</totalSizeCap>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${ERROR_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="FILE_ERROR_ASYNC" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>1000</queueSize>
+        <neverBlock>true</neverBlock>
+        <includeCallerData>false</includeCallerData>
+        <maxFlushTime>1000</maxFlushTime>
+        <appender-ref ref="FILE_ERROR"/>
+    </appender>
+
+    <logger name="com.xtop.ddd" additivity="false" level="DEBUG">
+        <appender-ref ref="FILE_INFO_ASYNC"/>
+        <appender-ref ref="FILE_ERROR_ASYNC"/>
+        <appender-ref ref="ASYNC_CONSOLE"/>
+    </logger>
+
+    <logger name="InfoLog_Proceed" additivity="false" level="INFO">
+        <appender-ref ref="FILE_INFO_ASYNC"/>
+        <appender-ref ref="FILE_ERROR_ASYNC"/>
+        <appender-ref ref="ASYNC_CONSOLE"/>
+    </logger>
+    <logger name="ErrorLog_Proceed" additivity="false" level="ERROR">
+        <appender-ref ref="FILE_ERROR_ASYNC"/>
+        <appender-ref ref="ASYNC_CONSOLE"/>
+    </logger>
+
+    <logger name="com.xtop" additivity="false" level="INFO">
+        <appender-ref ref="FILE_INFO_ASYNC"/>
+        <appender-ref ref="FILE_ERROR_ASYNC"/>
+        <appender-ref ref="ASYNC_CONSOLE"/>
+    </logger>
+
+    <!--    <logger name="com.gpam" additivity="false" level="INFO">-->
+    <!--        <appender-ref ref="FILE_INFO_ASYNC"/>-->
+    <!--        <appender-ref ref="FILE_ERROR_ASYNC"/>-->
+    <!--        <appender-ref ref="ASYNC_CONSOLE"/>-->
+    <!--    </logger>-->
+
+    <logger name="org.springdoc" additivity="false" level="INFO">
+        <appender-ref ref="FILE_INFO_ASYNC"/>
+        <appender-ref ref="FILE_ERROR_ASYNC"/>
+        <appender-ref ref="ASYNC_CONSOLE"/>
+    </logger>
+    <logger name="com.alibaba.druid" additivity="false" level="ERROR">
+        <appender-ref ref="FILE_ERROR_ASYNC"/>
+        <appender-ref ref="ASYNC_CONSOLE"/>
+    </logger>
+
+    <logger name="org.springframework" additivity="false" level="ERROR">
+        <appender-ref ref="FILE_ERROR_ASYNC"/>
+        <appender-ref ref="ASYNC_CONSOLE"/>
+    </logger>
+    <logger name="org.apache.http" additivity="false" level="ERROR">
+        <appender-ref ref="FILE_ERROR_ASYNC"/>
+        <appender-ref ref="ASYNC_CONSOLE"/>
+    </logger>
+    <logger name="org.activiti" additivity="false" level="ERROR">
+        <appender-ref ref="FILE_ERROR_ASYNC"/>
+        <appender-ref ref="ASYNC_CONSOLE"/>
+    </logger>
+    <logger name="org.mybatis" additivity="false" level="ERROR">
+        <appender-ref ref="FILE_ERROR_ASYNC"/>
+        <appender-ref ref="ASYNC_CONSOLE"/>
+    </logger>
+    <logger name="com.baomidou" additivity="false" level="DEBUG">
+        <appender-ref ref="FILE_INFO_ASYNC"/>
+        <appender-ref ref="FILE_ERROR_ASYNC"/>
+        <appender-ref ref="ASYNC_CONSOLE"/>
+    </logger>
+    <logger name="druid.sql.DataSource" additivity="false" level="ERROR">
+        <appender-ref ref="FILE_ERROR_ASYNC"/>
+        <appender-ref ref="ASYNC_CONSOLE"/>
+    </logger>
+    <logger name="httpclient.wire" additivity="false" level="ERROR">
+        <appender-ref ref="FILE_ERROR_ASYNC"/>
+        <appender-ref ref="ASYNC_CONSOLE"/>
+    </logger>
+
+    <root level="ERROR">
+        <appender-ref ref="FILE_ERROR_ASYNC"/>
+        <appender-ref ref="ASYNC_CONSOLE"/>
+    </root>
+</configuration>
