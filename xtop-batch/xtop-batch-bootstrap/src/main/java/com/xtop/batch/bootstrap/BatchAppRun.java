@@ -38,7 +38,7 @@ public class BatchAppRun
     @EventListener(ApplicationReadyEvent.class)
     public void onStartupSuccess() {
         log.info("=====================================");
-        log.info("   xtop-batch 服务启动成功！       ");
+        log.info("   xtop-batch 服务启动成功！        ");
         log.info("=====================================\n");
     }
 }
