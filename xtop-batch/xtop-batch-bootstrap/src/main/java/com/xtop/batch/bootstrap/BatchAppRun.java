@@ -10,6 +10,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.event.EventListener;
+import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -27,6 +28,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableFeignClients(basePackages = {"com.xtop"})
 @EnableDiscoveryClient
 @MapperScan({"com.xtop.batch.dao.mapper", "com.xtop.infra.dao.mapper"})
+@EnableElasticsearchRepositories(basePackages = "com.xtop.batch.dao.mapper.es")
 @EnableBatchProcessing
 public class BatchAppRun
 {

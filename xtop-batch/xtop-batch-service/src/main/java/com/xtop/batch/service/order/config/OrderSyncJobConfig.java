@@ -73,6 +73,12 @@ public class OrderSyncJobConfig {
                 .reader(orderReader)
                 .processor(orderProcessor)
                 .writer(orderWriter)
+                .faultTolerant()
+                .retryLimit(3)
+                .retry(Exception.class)
+                .noRetry(IllegalStateException.class)
+                .skipLimit(10)
+                .skip(Exception.class)
                 .build();
     }
 

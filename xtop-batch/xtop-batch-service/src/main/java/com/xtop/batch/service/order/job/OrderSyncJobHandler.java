@@ -5,45 +5,75 @@ import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.*;
+import org.springframework.batch.core.explore.JobExplorer;
 import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobExecutionAlreadyRunningException;
+import org.springframework.batch.core.repository.JobInstanceAlreadyCompleteException;
+import org.springframework.batch.core.repository.JobRestartException;
 import org.springframework.stereotype.Component;
 
-/**
- * 订单同步定时任务处理器
- * 职责：接收 XXL-JOB 调度，启动 Spring Batch Job
- */
+import java.util.List;
+
 @Component
-@RequiredArgsConstructor // Lombok 自动注入构造函数
+@RequiredArgsConstructor
 public class OrderSyncJobHandler {
 
     private final JobLauncher jobLauncher;
-    private final Job orderSyncJob; // 注入你在 Config 中定义的 Job Bean
+    private final Job orderSyncJob;
+    private final JobExplorer jobExplorer;
 
-    @XxlJob("orderSyncJobHandler") // XXL-JOB 后台配置的 JobHandler 名称
-    public ReturnT<String> execute(String param) throws Exception {
+    @XxlJob("orderSyncJobHandler")
+    public ReturnT<String> execute(String param) {
         LogUtil.INFO_LOG.info(">>> XXL-JOB 触发订单同步任务, 参数: {}", param);
 
         try {
-            // 1. 构建 Job 参数 (可选，如果需要从 XXL-JOB 传参给 Batch)
             JobParameters jobParameters = new JobParametersBuilder()
-                    .addLong("time", System.currentTimeMillis()) // 必须加个时间戳，保证每次运行都是新的实例
-                    .addString("requestId", param)
+                    .addString("requestId", param == null || param.isEmpty() ? "fixed-order-sync" : param)
                     .toJobParameters();
 
-            // 2. 启动 Batch Job
-            JobExecution execution = jobLauncher.run(orderSyncJob, jobParameters);
+            JobInstance lastInstance = jobExplorer.getLastJobInstance(orderSyncJob.getName());
+            if (lastInstance != null) {
+                List<JobExecution> executions = jobExplorer.getJobExecutions(lastInstance);
+                JobExecution lastExecution = executions.get(executions.size() - 1);
 
-            // 3. 根据 Batch 的执行结果返回状态给 XXL-JOB
-            if (execution.getStatus() == BatchStatus.COMPLETED) {
-                LogUtil.INFO_LOG.info(">>> 订单同步任务执行成功");
-                return ReturnT.SUCCESS;
-            } else {
-                LogUtil.ERROR_LOG.error(">>> 订单同步任务执行失败: {}", execution.getStatus());
-                return new ReturnT<>(ReturnT.FAIL_CODE, "Batch Job Failed: " + execution.getStatus());
+                if (lastExecution.getStatus() == BatchStatus.FAILED
+                        || lastExecution.getStatus() == BatchStatus.STOPPED) {
+                    LogUtil.INFO_LOG.info(">>> 发现未完成的 Job，尝试断点续传...");
+                    JobExecution execution = jobLauncher.run(orderSyncJob, lastExecution.getJobParameters());
+                    return buildResult(execution);
+                }
+
+                if (lastExecution.getStatus() == BatchStatus.COMPLETED) {
+                    LogUtil.INFO_LOG.error(">>> 幂等拦截：该任务已成功执行过，不可重复执行");
+                    return new ReturnT<>(ReturnT.FAIL_CODE, "幂等拦截：任务已成功执行过");
+                }
             }
+
+            JobExecution execution = jobLauncher.run(orderSyncJob, jobParameters);
+            return buildResult(execution);
+
+        } catch (JobInstanceAlreadyCompleteException e) {
+            LogUtil.INFO_LOG.error(">>> 幂等拦截: {}", e.getMessage());
+            return new ReturnT<>(ReturnT.FAIL_CODE, "幂等拦截: " + e.getMessage());
+        } catch (JobExecutionAlreadyRunningException e) {
+            LogUtil.INFO_LOG.error(">>> 任务正在运行中: {}", e.getMessage());
+            return new ReturnT<>(ReturnT.FAIL_CODE, "任务正在运行中: " + e.getMessage());
+        } catch (JobRestartException e) {
+            LogUtil.ERROR_LOG.error(">>> 任务重启失败: {}", e.getMessage());
+            return new ReturnT<>(ReturnT.FAIL_CODE, "重启失败: " + e.getMessage());
         } catch (Exception e) {
             LogUtil.ERROR_LOG.error(">>> 订单同步任务异常", e);
             return new ReturnT<>(ReturnT.FAIL_CODE, e.getMessage());
+        }
+    }
+
+    private ReturnT<String> buildResult(JobExecution execution) {
+        if (execution.getStatus() == BatchStatus.COMPLETED) {
+            LogUtil.INFO_LOG.info(">>> 订单同步任务执行成功");
+            return ReturnT.SUCCESS;
+        } else {
+            LogUtil.ERROR_LOG.error(">>> 订单同步任务执行失败: {}", execution.getStatus());
+            return new ReturnT<>(ReturnT.FAIL_CODE, "Batch Job Failed: " + execution.getStatus());
         }
     }
 }

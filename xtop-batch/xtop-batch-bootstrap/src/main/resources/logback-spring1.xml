@@ -110,6 +110,8 @@
         <appender-ref ref="ASYNC_CONSOLE"/>
     </logger>
 
+    <logger name="com.alibaba.otter.canal.client" level="DEBUG" />
+
     <logger name="com.xtop" additivity="false" level="INFO">
         <appender-ref ref="FILE_INFO_ASYNC"/>
         <appender-ref ref="FILE_ERROR_ASYNC"/>
@@ -162,7 +164,8 @@
         <appender-ref ref="ASYNC_CONSOLE"/>
     </logger>
 
-    <root level="ERROR">
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
         <appender-ref ref="FILE_ERROR_ASYNC"/>
         <appender-ref ref="ASYNC_CONSOLE"/>
     </root>

@@ -64,13 +64,31 @@ spring:
             test-on-return: false
             validation-query: SELECT 1 FROM DUAL
 
+  data:
+    elasticsearch:
+      cluster-nodes: 192.168.150.149:2010
+
+
 
   batch:
+    jdbc:
+      # 1. 确保键名是 initialize-schema，值为 always
+      initialize-schema: always
     job:
       enabled: false # 启动时不自动运行
-    initializer:
-      enabled: true # 自动初始化 Batch 的元数据表
-      schema: classpath:org/springframework/batch/core/schema-mysql.sql
+
+canal:
+  host: 192.168.150.149
+  port: 11111
+  destination: example
+  username: canal
+  password: Canal@123456
+
+
+
+#    initializer:
+#      enabled: true # 自动初始化 Batch 的元数据表
+#      schema: classpath:org/springframework/batch/core/schema-mysql.sql
 
 # ==================== XXL-JOB 执行器配置 ====================
 xxl:
@@ -107,6 +125,7 @@ logging:
     org.mybatis.spring.SqlSessionFactoryBean: DEBUG  # 打印 XML 加载日志
     com.baomidou.mybatisplus.autoconfigure: DEBUG
     com.xxl.job: DEBUG
+    org.springframework.data.elasticsearch: DEBUG
 #    # Consul相关日志
 #    org.springframework.cloud.consul: DEBUG
 #    com.ecwid.consul: DEBUG

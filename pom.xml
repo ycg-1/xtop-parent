@@ -21,8 +21,6 @@
     <module>xtop-ddd-order</module>
     <module>xtop-ddd-user</module>
       <module>xtop-batch</module>
-
-
   </modules>
 
   <properties>
@@ -33,6 +31,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <spring-boot.version>2.3.12.RELEASE</spring-boot.version>
     <spring-cloud.version>Hoxton.SR12</spring-cloud.version>
+<!--    <elasticsearch.version>7.17.9</elasticsearch.version>-->
   </properties>
 
   <dependencyManagement>
