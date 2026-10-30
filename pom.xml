@@ -20,7 +20,8 @@
     <module>xtop-gateway</module>
     <module>xtop-ddd-order</module>
     <module>xtop-ddd-user</module>
-      <module>xtop-batch</module>
+    <module>xtop-batch</module>
+    <module>xtop-workflow</module>
   </modules>
 
   <properties>
@@ -146,7 +147,7 @@
 
 
 
-      <!--ddd-batch 内部模块  依赖 start-->
+      <!-- xtop-batch 内部模块  依赖 start-->
       <dependency>
         <groupId>com.xtop</groupId>
         <artifactId>xtop-batch-model</artifactId>
@@ -167,7 +168,32 @@
         <artifactId>xtop-batch-controller</artifactId>
         <version>${project.version}</version>
       </dependency>
-      <!--ddd-batch 内部模块  依赖 end-->
+      <!--xtop-batch 内部模块  依赖 end-->
+
+
+
+      <!-- xtop-workflow 内部模块  依赖 start-->
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-workflow-model</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-workflow-dao</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-workflow-service</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.xtop</groupId>
+        <artifactId>xtop-workflow-controller</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+      <!--xtop-workflow 内部模块  依赖 end-->
 
 
 

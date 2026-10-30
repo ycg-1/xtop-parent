@@ -17,6 +17,20 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.xtop</groupId>
+            <artifactId>xtop-common-feign</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.xtop</groupId>
+            <artifactId>xtop-common-model</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.xtop</groupId>
+            <artifactId>xtop-common-util</artifactId>
+        </dependency>
+
         <!-- Lombok 简化实体类 -->
         <dependency>
             <groupId>org.projectlombok</groupId>

@@ -1,0 +1,144 @@
+server:
+  servlet:
+    context-path: /xtop-workflow
+  port: 8085
+
+spring:
+  application:
+    name: xtop-workflow
+  redis:
+    host: 172.19.8.25
+    port: 6379
+    database: 0
+
+  datasource:
+    druid:
+      # xquant-workflow-engine 仍读取旧版全局方言配置
+      dialect: mysql
+    dynamic:
+      primary: nosharding-db  # 设置默认的数据源
+      strict: false          # 严格匹配数据源，默认false
+      datasource:
+        # 主数据源（不分片数据库）
+        nosharding-db:
+          url: jdbc:mysql://192.168.150.149:3306/xtop-workflow?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+          username: root
+          # MyPass@2024
+          password: MyPass@2024
+          # password: ENC(+nPmYc/XxXD3O3kskhZ5/toq47daR/6OwEB5x4WB97HpFX7l6tf9QOXduBR0u1a0)
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          druid:
+            initial-size: 10
+            max-active: 500
+            min-idle: 10
+            max-wait: 60000
+            pool-prepared-statements: true
+            max-pool-prepared-statement-per-connection-size: 20
+            time-between-eviction-runs-millis: 10000
+            min-evictable-idle-time-millis: 30000
+            removeAbandoned: true
+            removeAbandonedTimeout: 10
+            test-while-idle: true
+            test-on-borrow: false
+            test-on-return: false
+            validation-query: SELECT 1 FROM DUAL
+        # 分布式事务数据源（不分片数据库）
+        tran-nosharding-db:
+          url: jdbc:mysql://192.168.150.149:3306/xtop-batch?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+          username: root
+          password: MyPass@2024
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          druid:
+            initial-size: 5
+            max-active: 100
+            min-idle: 5
+            max-wait: 60000
+            pool-prepared-statements: true
+            max-pool-prepared-statement-per-connection-size: 20
+            time-between-eviction-runs-millis: 10000
+            min-evictable-idle-time-millis: 30000
+            removeAbandoned: true
+            removeAbandonedTimeout: 10
+            test-while-idle: true
+            test-on-borrow: false
+            test-on-return: false
+            validation-query: SELECT 1 FROM DUAL
+
+flowable:
+  database-schema-update: true  # 自动建表
+  history-level: audit
+
+# 业务配置
+biz:
+  data-source-name: nosharding-db     # 使用不分片数据源
+  # data-source-name: ds              # 使用分片数据源（备选）
+
+# 分布式事务配置
+distributedTransaction:
+  data-source-name: tran-nosharding-db     # 使用不分片数据源
+  # data-source-name: tran-sharding-db     # 使用分片数据源（备选）
+logging:
+  config: classpath:logback-spring1.xml
+  level:
+    com.xtop.scheduler.master.mapper: info
+    com.xtop.dao: DEBUG  # 替换为实际 Mapper 包名
+    com.baomidou.dynamic.datasource: DEBUG
+    org.mybatis.spring.SqlSessionFactoryBean: DEBUG  # 打印 XML 加载日志
+    com.baomidou.mybatisplus.autoconfigure: DEBUG
+    com.xxl.job: DEBUG
+    org.springframework.data.elasticsearch: DEBUG
+#    # Consul相关日志
+#    org.springframework.cloud.consul: DEBUG
+#    com.ecwid.consul: DEBUG
+#    com.xquant.xtop.bootstrap.config: DEBUG
+#    com.xquant.xtop.bootstrap.listener: INFO
+
+mybatis-plus:
+  # 按数据源加载业务 Mapper，Flowable Modeler XML 由独立 SqlSessionFactory 处理
+  datasource:
+    nosharding-db:
+      mapper-locations: classpath*:mapper/dao/ADatabase/**/**/*.xml,classpath*:sqlMapper/**/*.xml,classpath*:/mapper/*.xml
+    tran-nosharding-db:
+      mapper-locations: classpath*:mapper/xbatch/**/**/*.xml
+  # 当前工程实际由默认 MyBatis-Plus SqlSessionFactory 加载业务 XML
+  mapper-locations: classpath*:mapper/**/*.xml,classpath*:sqlMapper/**/*.xml,classpath*:/mapper/*.xml
+  type-aliases-package: com.xquant.xtop.model.common
+  configuration-properties:
+    prefix: ""
+  configuration:
+    #配置返回数据库(column下划线命名&&返回java实体是驼峰命名)，自动匹配无需as（没开启这个，SQL需要写as： select user_id as userId）
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    #配置JdbcTypeForNull, oracle数据库必须配置
+    jdbc-type-for-null: 'null'
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always
+
+jasypt:
+  encryptor:
+    # 从环境变量中读取主密钥  JASYPT_ENCRYPTOR_PASSWORD=your_master_key
+    # password: ${JASYPT_ENCRYPTOR_PASSWORD}
+    password: your_master_key
+    algorithm: PBEWITHHMACSHA512ANDAES_256
+    iv-generator-classname: org.jasypt.iv.RandomIvGenerator
+
+jwt:
+  private-key-path: keys/private.pem
+  public-key-path: keys/public.pem
+#  access-token-expiration: 7200
+  access-token-expiration: 7200
+  refresh-token-expiration: 6048002
+
+# 多设备登录配置
+auth:
+  multi-device:
+    enabled: true    # false=单点登录（默认），true=多设备登录
+    max-devices: 3    # 全局默认最大同时登录设备数
