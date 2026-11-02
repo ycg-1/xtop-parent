@@ -20,6 +20,23 @@ public class FlowableProcessEngine {
     private final RuntimeService runtimeService;
     private final TaskService taskService;
 
+
+
+    // 启动流程并检查任务
+    public void testStartProcess() {
+        // 1. 启动我们刚刚画的流程（注意 Key 必须是 multi_level_approval）
+        runtimeService.startProcessInstanceByKey("multi_level_approval");
+
+        // 2. 查询当前待办任务
+        List<Task> tasks = taskService.createTaskQuery().list();
+
+        // 3. 打印出来看看
+        System.out.println("当前待办任务数量: " + tasks.size());
+        for (Task task : tasks) {
+            System.out.println("任务名称: " + task.getName());
+        }
+    }
+
     /**
      * 发起流程
      */

@@ -32,6 +32,7 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <spring-boot.version>2.3.12.RELEASE</spring-boot.version>
     <spring-cloud.version>Hoxton.SR12</spring-cloud.version>
+    <liquibase.version>4.9.1</liquibase.version>
 <!--    <elasticsearch.version>7.17.9</elasticsearch.version>-->
   </properties>
 
@@ -194,6 +195,13 @@
         <version>${project.version}</version>
       </dependency>
       <!--xtop-workflow 内部模块  依赖 end-->
+
+
+      <dependency>
+        <groupId>org.liquibase</groupId>
+        <artifactId>liquibase-core</artifactId>
+        <version>${liquibase.version}</version>
+      </dependency>
 
 
 

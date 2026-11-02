@@ -6,6 +6,9 @@ server:
 spring:
   application:
     name: xtop-workflow
+
+  iquibase:
+    enabled: false
   redis:
     host: 172.19.8.25
     port: 6379
@@ -21,7 +24,7 @@ spring:
       datasource:
         # 主数据源（不分片数据库）
         nosharding-db:
-          url: jdbc:mysql://192.168.150.149:3306/xtop-workflow?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+          url: jdbc:mysql://192.168.150.149:3306/flowable_ui?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&nullCatalogMeansCurrent=true
           username: root
           # MyPass@2024
           password: MyPass@2024
@@ -65,8 +68,9 @@ spring:
             validation-query: SELECT 1 FROM DUAL
 
 flowable:
-  database-schema-update: true  # 自动建表
+  database-schema-update: true  # 保持 true 不变
   history-level: audit
+  async-executor-activate: false # 建议加上这个，开发环境避免定时任务冲突
 
 # 业务配置
 biz:

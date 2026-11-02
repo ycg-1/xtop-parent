@@ -33,6 +33,12 @@
             <version>6.8.0</version>
         </dependency>
 
+        <!-- 4. Flowable 建表/升级依赖的 Liquibase，必须是 4.x（版本由父 pom 统一管理） -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
+
 
 
     </dependencies>
