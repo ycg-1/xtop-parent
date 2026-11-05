@@ -11,6 +11,50 @@ spring:
     port: 6379
     database: 0
 
+  kafka:
+    # 集群地址，把你三台机器都配进去，高可用
+    bootstrap-servers: 192.168.150.150:9092,192.168.150.151:9092,192.168.150.154:9092
+
+    # ================= 生产者配置 =================
+    producer:
+      # 序列化方式
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      # 核心：acks=all 等待所有ISR副本确认，防止丢消息
+      acks: all
+      # 发送失败重试次数
+      retries: 3
+      # 批次大小，攒够16KB再发，提升吞吐
+      batch-size: 16384
+      # 生产者内存缓冲区大小
+      buffer-memory: 33554432
+
+    # ================= 消费者配置 =================
+    consumer:
+      # 反序列化方式
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      # 消费组ID，同一个组的消费者互斥消费
+      group-id: order-consumer-group
+      # 核心：earliest - 服务重启后从最早未消费的位置开始，防止丢消息
+      auto-offset-reset: earliest
+      # 核心：关闭自动提交，改为手动提交（配合代码里的 ack.acknowledge()）
+      enable-auto-commit: false
+      # 一次 poll 最多拉取多少条，防止单次拉太多处理超时导致重平衡
+      max-poll-records: 200
+
+    # ================= 监听器容器配置 =================
+    listener:
+      # 核心：手动提交模式，业务处理完再提交偏移量
+      ack-mode: manual_immediate
+      # 两次 poll 的最大间隔（毫秒），超过这个时间没拉取新消息，Kafka认为消费者挂了
+      # 10分钟，给复杂业务留足处理时间，防止消息堆积触发重平衡
+      poll-timeout: 600000
+      # 消费者并发线程数，对应 Topic 的分区数，有几个分区就配几个
+      concurrency: 3
+      # 监听容器缺失主题时不报错（可选）
+      missing-topics-fatal: false
+
   datasource:
     druid:
       # xquant-workflow-engine 仍读取旧版全局方言配置
