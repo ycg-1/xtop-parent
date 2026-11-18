@@ -21,6 +21,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+
+    <distributionManagement>
+        <repository>
+            <id>xtop-hosted</id>
+            <name>XTOP Private Hosted Repository</name>
+            <url>http://192.168.150.154:2256/repository/xtop-hosted/</url>
+        </repository>
+    </distributionManagement>
+
     <dependencies>
 
 
