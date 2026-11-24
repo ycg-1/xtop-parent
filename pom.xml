@@ -22,6 +22,9 @@
     <module>xtop-ddd-user</module>
     <module>xtop-batch</module>
     <module>xtop-workflow</module>
+    <module>xtop-acl</module>
+    <module>xtop-bmp</module>
+
   </modules>
 
   <properties>
