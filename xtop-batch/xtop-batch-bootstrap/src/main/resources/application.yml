@@ -47,6 +47,20 @@ spring:
 #    host: 172.19.8.25
 #    port: 6379
 #    database: 0
+  cloud:
+    consul:
+      host: 192.168.150.135
+      port: 8500
+      acl-token: e8cd013b-a9f1-4da7-a0a9-77a44b9991f4
+      discovery:
+        service-name: ${spring.application.name}
+        health-check-path: /actuator/health
+        health-check-interval: 10s
+        health-check-timeout: 5s
+        health-check-critical-timeout: 30m
+        instance-id: ${spring.application.name}-${spring.cloud.client.ip-address}:${server.port}
+        prefer-ip-address: true
+
   redis:
     password: YourRedisPassword123
     sentinel:
